@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local SQLite database
+*.db
+*.db-journal
+
+# Temporary AI agent/editor directories
+.agents/
+.claude/
+.cursor/
+.devin/
+
+# Temporary fix scripts used during development
+fix-cards.js
+fix-inputs.js
+fix-name.js
+fix-theme.js
+add-light-mode.js
+convert-dark-mode.js
