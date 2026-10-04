@@ -1,6 +1,7 @@
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -24,8 +25,6 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 }
-
-
 
 model Department {
   id           String       @id @default(uuid())
@@ -74,15 +73,13 @@ model Ticket {
   updatedAt    DateTime     @updatedAt
 }
 
-
-
 model AuditLog {
   id           String       @id @default(uuid())
   ticketId     String
   ticket       Ticket       @relation(fields: [ticketId], references: [id])
   
-  action       String       // e.g., "CREATED", "ASSIGNED", "SEVERITY_CHANGED", "RESOLVED", "REOPENED"
-  details      String?      // Optional JSON string for extra context
+  action       String
+  details      String?
   
   actorId      String
   actor        User         @relation(fields: [actorId], references: [id])
