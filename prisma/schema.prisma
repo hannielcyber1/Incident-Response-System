@@ -12,7 +12,7 @@ model User {
   id           String       @id @default(uuid())
   name         String
   password     String?
-  email        String       @unique
+  email        String
   role         String       @default("EMPLOYEE")
   departmentId String?
   department   Department?  @relation(fields: [departmentId], references: [id])

@@ -22,8 +22,8 @@ export async function createUser(formData: FormData) {
 
   if (!name || !email || !password || !role) throw new Error('Missing required fields')
 
-  const existing = await prisma.user.findUnique({ where: { email } })
-  if (existing) throw new Error('User with this email already exists')
+  const existing = await prisma.user.findFirst({ where: { name } })
+  if (existing) throw new Error('User with this name already exists')
 
   await prisma.user.create({
     data: { name, email, password, role, departmentId: departmentId || null }
