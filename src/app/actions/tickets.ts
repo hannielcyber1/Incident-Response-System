@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import { getUser } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { sendEmail, ADMIN_EMAILS } from '@/lib/email'
 
 export async function createTicket(formData: FormData) {
   const user = await getUser()
@@ -56,11 +57,29 @@ export async function createTicket(formData: FormData) {
     }
   })
 
-  // 4. Mock Email Notification to Department Head
+  // 4. Send Email & Notifications
   if (deptHead) {
-    console.log(`[EMAIL SENT] To: ${deptHead.email} - Subject: Action Required: New Ticket in your department needs assignment: ${ticket.title} (ID: ${ticket.id})`)
+    await sendEmail({
+      to: deptHead.email,
+      subject: `Action Required: New Ticket in your department`,
+      html: `<p>A new ticket requires assignment: <strong>${ticket.title}</strong> (ID: ${ticket.id})</p>`
+    })
+    
+    await import('@/lib/notifications').then(({ createNotification }) => {
+      return createNotification(
+        deptHead.id,
+        'New Ticket Requires Assignment',
+        `"${ticket.title}" needs to be assigned.`,
+        'ACTION',
+        ticket.id
+      )
+    })
   } else {
-    console.log(`[EMAIL SENT] To: Global Admin - Subject: Missing Dept Head for Ticket: ${ticket.title} (ID: ${ticket.id})`)
+    await sendEmail({
+      to: ADMIN_EMAILS,
+      subject: `Missing Dept Head for Ticket`,
+      html: `<p>Ticket <strong>${ticket.title}</strong> was created but no Department Head exists for its department.</p>`
+    })
   }
 
   revalidatePath('/tickets')

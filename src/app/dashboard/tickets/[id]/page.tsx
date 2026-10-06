@@ -6,6 +6,7 @@ import {
   updateTicketStatus,
   updateTicketSeverity,
   reassignTicket,
+  escalateTicket,
 } from '@/app/actions/dashboard'
 
 // ── Badge helpers ─────────────────────────────────────────────────────────────
@@ -102,39 +103,71 @@ function AuditLogList({ logs }: { logs: AuditLogEntry[] }) {
 
 // ── Handler action buttons ─────────────────────────────────────────────────────
 
-function HandlerActions({ ticketId, status }: { ticketId: string; status: string }) {
+function EscalateForm({ ticketId, escalateTo }: { ticketId: string, escalateTo: string }) {
   return (
-    <div className="flex flex-wrap gap-3">
-      {status !== 'IN_PROGRESS' && (
-        <form
-          action={async () => {
-            'use server'
-            await updateTicketStatus(ticketId, 'IN_PROGRESS')
-          }}
+    <div className="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-900/50 p-4 space-y-3 w-full mt-4">
+      <h3 className="text-sm font-semibold text-red-800 dark:text-red-400">Escalate Ticket to {escalateTo}</h3>
+      <form
+        action={async (fd: FormData) => {
+          'use server'
+          const reason = fd.get('reason') as string
+          await escalateTicket(ticketId, reason)
+        }}
+        className="flex gap-2"
+      >
+        <input
+          name="reason"
+          required
+          placeholder="Reason for escalation..."
+          className="flex-1 text-sm rounded-lg border border-red-200 dark:border-red-900/50 bg-white dark:bg-[#171f33] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 text-[#1a1b2e] dark:text-[#dae2fd]"
+        />
+        <button
+          type="submit"
+          className="px-3 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
         >
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+          Escalate
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function HandlerActions({ ticketId, status, hideEscalate = false }: { ticketId: string; status: string; hideEscalate?: boolean }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-3">
+        {status !== 'IN_PROGRESS' && (
+          <form
+            action={async () => {
+              'use server'
+              await updateTicketStatus(ticketId, 'IN_PROGRESS')
+            }}
           >
-            Mark as In Progress
-          </button>
-        </form>
-      )}
-      {status !== 'RESOLVED' && (
-        <form
-          action={async () => {
-            'use server'
-            await updateTicketStatus(ticketId, 'RESOLVED')
-          }}
-        >
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+            >
+              Mark as In Progress
+            </button>
+          </form>
+        )}
+        {status !== 'RESOLVED' && (
+          <form
+            action={async () => {
+              'use server'
+              await updateTicketStatus(ticketId, 'RESOLVED')
+            }}
           >
-            Mark as Resolved
-          </button>
-        </form>
-      )}
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+            >
+              Mark as Resolved
+            </button>
+          </form>
+        )}
+      </div>
+      {!hideEscalate && <EscalateForm ticketId={ticketId} escalateTo="Department Head" />}
     </div>
   )
 }
@@ -157,7 +190,7 @@ function HeadActions({
   return (
     <div className="space-y-4">
       {/* Inherited handler buttons */}
-      <HandlerActions ticketId={ticketId} status={status} />
+      <HandlerActions ticketId={ticketId} status={status} hideEscalate={true} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         {/* Severity selector */}
@@ -222,6 +255,9 @@ function HeadActions({
           </form>
         </div>
       </div>
+      
+      {/* Escalate to Admin */}
+      <EscalateForm ticketId={ticketId} escalateTo="Admin" />
     </div>
   )
 }

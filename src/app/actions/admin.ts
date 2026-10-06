@@ -3,6 +3,7 @@
 import prisma from '@/lib/prisma'
 import { getUser } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { sendEmail, ADMIN_EMAILS } from '@/lib/email'
 
 async function assertAdmin() {
   const admin = await getUser()
@@ -28,7 +29,12 @@ export async function createUser(formData: FormData) {
     data: { name, email, password, role, departmentId: departmentId || null }
   })
 
-  console.log(`[EMAIL SENT] To: ${email} - Subject: Welcome to Incident Response System! Your login name: "${name}" | Password: ${password}`)
+  await sendEmail({
+    to: ADMIN_EMAILS,
+    subject: `Welcome to Incident Response System! Your login name: "${name}"`,
+    html: `<p>A new user was created:</p><p>Name: <strong>${name}</strong></p><p>Password: <strong>${password}</strong></p>`
+  })
+
   revalidatePath('/admin/users')
 }
 

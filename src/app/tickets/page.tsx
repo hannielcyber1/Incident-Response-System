@@ -3,6 +3,15 @@ import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
+function StatCard({ label, value, color = 'text-[#1a1b2e] dark:text-[#dae2fd]' }: { label: string, value: number, color?: string }) {
+  return (
+    <div className="bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] shadow-sm rounded-xl px-6 py-4 flex flex-col gap-1">
+      <span className="text-sm text-[#8b8ca8] dark:text-[#c7c4d8]">{label}</span>
+      <span className={`text-3xl font-bold ${color}`}>{value}</span>
+    </div>
+  )
+}
+
 export default async function TicketsPage() {
   const user = await getUser()
   if (!user) redirect('/login')
@@ -13,13 +22,25 @@ export default async function TicketsPage() {
     orderBy: { createdAt: 'desc' }
   })
 
+  const total = tickets.length
+  const pending = tickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length
+  const resolved = tickets.filter(t => t.status === 'RESOLVED').length
+  const unassigned = tickets.filter(t => !t.responderId).length
+
   return (
     <div className="container mx-auto p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">My Tickets</h1>
-        <Link href="/tickets/new" className="bg-blue-600 hover:bg-blue-700 text-[#1a1b2e] dark:text-[#dae2fd] px-4 py-2 rounded">
+        <Link href="/tickets/new" className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-4 py-2 rounded-lg font-medium transition-colors">
           Report New Incident
         </Link>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        <StatCard label="Total Tickets" value={total} />
+        <StatCard label="Pending" value={pending} color="text-blue-600" />
+        <StatCard label="Resolved" value={resolved} color="text-green-600" />
+        <StatCard label="Unassigned" value={unassigned} color="text-red-500" />
       </div>
       
       <div className="bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] shadow-2xl rounded-lg shadow overflow-hidden">

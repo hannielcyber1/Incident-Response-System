@@ -1,9 +1,20 @@
 import { getUser } from '@/lib/auth'
+import prisma from '@/lib/prisma'
 import { LogoutButton } from './LogoutButton'
 import { ThemeToggle } from './ThemeToggle'
+import { NotificationDropdown } from './NotificationDropdown'
 
 export async function Navbar() {
   const user = await getUser()
+  let notifications: any[] = []
+  
+  if (user) {
+    notifications = await prisma.notification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    })
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/90 dark:bg-[#0b1326]/90 backdrop-blur-md border-b border-[#d0d1e6] dark:border-[#464555]">
@@ -30,6 +41,7 @@ export async function Navbar() {
 
           <div className="h-4 w-px bg-[#d0d1e6] dark:bg-[#464555] hidden md:block" />
 
+          {user && <NotificationDropdown initialNotifications={notifications} />}
           <ThemeToggle />
 
           {user && <LogoutButton />}

@@ -21,6 +21,7 @@ model User {
   createdTickets Ticket[]   @relation("CreatedTickets")
   assignedTickets Ticket[]  @relation("AssignedTickets")
   auditLogs    AuditLog[]
+  notifications Notification[]
 
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
@@ -86,3 +87,18 @@ model AuditLog {
 
   createdAt    DateTime     @default(now())
 }
+
+model Notification {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  
+  title        String
+  message      String
+  type         String       @default("INFO")
+  isRead       Boolean      @default(false)
+  ticketId     String?
+  
+  createdAt    DateTime     @default(now())
+}
+

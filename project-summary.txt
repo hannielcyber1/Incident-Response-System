@@ -1,0 +1,94 @@
+================================================================================
+INCIDENT SYSTEM (ENTERPRISE OPS) - PROJECT SUMMARY & IMPLEMENTATION LOG
+================================================================================
+
+1. SYSTEM OVERVIEW
+--------------------------------------------------------------------------------
+The Incident System is a full-stack, enterprise-grade Incident Response platform. 
+It serves as a centralized hub for reporting, routing, managing, and analyzing 
+internal technical and operational incidents across multiple departments. The 
+system features a modern Material Design 3 (MD3) aesthetic with full dark/light 
+mode support, role-based access control (RBAC), and automated email routing.
+
+2. TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+- Frontend Framework: Next.js 14 (App Router)
+- UI / Styling: Tailwind CSS v4, Material Symbols Outlined, Google Fonts (Space Grotesk, Plus Jakarta Sans, JetBrains Mono)
+- State & Theming: next-themes (for dark/light mode context), React Context (Sidebar state)
+- Backend Logic: Next.js Server Actions & API Routes
+- Database & ORM: Prisma ORM with a local SQLite database (dev.db)
+- Security: HTTP-only cookies for session handling, bcrypt for password hashing
+
+3. CORE ROLES & PERMISSIONS
+--------------------------------------------------------------------------------
+- Employee: 
+  Can report new incidents and view a history of their own submitted tickets. 
+  Cannot see other employees' tickets. Can reopen their own resolved tickets.
+- Incident Handler: 
+  Assigned to a specific department (e.g., IT Operations). Can view all tickets 
+  routed to their department. Can update ticket status (In Progress, Resolved).
+- Department Head: 
+  Oversees a specific department. Can do everything a Handler does, plus:
+  - Re-evaluate and update ticket Severity (Low, Medium, High, Critical).
+  - Reassign tickets to different Handlers within their department.
+  - Cannot manually create new tickets.
+- Admin: 
+  Global oversight. Can view all tickets across all departments. Has access to 
+  the System Overview analytics dashboard, User Management (add, edit, deactivate, 
+  delete), and global Audit Logs.
+
+4. KEY FEATURES IMPLEMENTED
+--------------------------------------------------------------------------------
+* Automated Routing & Email Alerts: 
+  When a ticket is created, it is routed automatically to the corresponding 
+  Department Head. The system simulates sending an email alert to the Head. 
+  When a Head assigns a Handler, an email alert is sent to the Handler's email.
+
+* Admin Overview Dashboard:
+  A robust analytics dashboard featuring:
+  - Real-time KPI telemetry cards (Total, Open, Resolved, Critical)
+  - Critical triage banner for unassigned tickets
+  - Department workload distribution bars
+  - Severity distribution 2x2 grid
+  - Recent incident table and audit log feed
+
+* Interactive Collapsible Sidebar:
+  A persistent navigation sidebar that syncs width state via React Context. 
+  It smoothly collapses into an icon-only view and dynamically filters navigation 
+  links based on the user's logged-in role.
+
+* Immutable Audit Logging:
+  Every critical action (ticket creation, status change, reassignment, severity 
+  change) automatically creates a tamper-proof audit log tracking the actor, 
+  the action, the affected ticket, and the exact timestamp.
+
+5. DEVELOPMENT LOG & ITERATIONS
+--------------------------------------------------------------------------------
+Throughout the development cycle, several major pivots and refinements were made:
+
+- Initial Architecture: Set up Next.js App Router with Prisma and SQLite. Built 
+  the core relational schema (Users, Departments, Categories, Tickets, AuditLogs).
+- Routing Logic Pivot: Originally tickets were assigned directly to handlers, but 
+  the logic was updated so tickets go to the Department Head first for triage, 
+  who then assigns them to Handlers.
+- User Management Restrictions: Removed self-registration completely. Only Admins 
+  can create and manage employee accounts to maintain enterprise security. Added 
+  account deactivation toggles.
+- Theme System Overhaul: Transitioned from basic Tailwind to a full Material 
+  Design 3 (MD3) enterprise aesthetic. 
+  - Overhauled Tailwind v4 configuration to fix dark mode class toggling.
+  - Designed a premium dark navy (#131b2e) and indigo (#4f46e5) palette.
+  - Wrote global scripts to enforce consistent UI vibes across both Light and 
+    Dark modes, ensuring light mode felt cohesive with indigo tints (#f4f4fd) 
+    instead of plain flat white.
+- Rebranding: Updated all hardcoded references from "IncidentSystem" to 
+  "Incident System".
+
+6. DEPLOYMENT & REPOSITORY STATUS
+--------------------------------------------------------------------------------
+- Version Control: Initialized a local Git repository.
+- Exclusions: Configured .gitignore to safely exclude the local SQLite database 
+  (.db files) and AI development logs.
+- Next Steps: Ready to be pushed to a remote GitHub repository. For production 
+  hosting (e.g., Vercel), the database provider would need to be migrated from 
+  SQLite to PostgreSQL (like Supabase or Vercel Postgres).

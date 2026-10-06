@@ -149,6 +149,10 @@ export default async function DashboardPage() {
       orderBy: { createdAt: 'desc' },
     })
 
+    const received = tickets.length
+    const solved = tickets.filter((t) => t.status === 'RESOLVED').length
+    const pending = tickets.filter((t) => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length
+
     return (
       <main className="min-h-screen bg-transparent p-6">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -158,6 +162,13 @@ export default async function DashboardPage() {
               Department: <span className="font-medium">{user.department?.name ?? '—'}</span>
             </p>
           </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard label="Tickets Received" value={received} />
+            <StatCard label="Tickets Solved" value={solved} color="text-green-600" />
+            <StatCard label="Pending Tickets" value={pending} color="text-blue-600" />
+          </div>
+
           <TicketsTable tickets={tickets} />
         </div>
       </main>
@@ -173,9 +184,15 @@ export default async function DashboardPage() {
       orderBy: { createdAt: 'desc' },
     })
 
+    const handlers = await prisma.user.findMany({
+      where: { departmentId: user.departmentId ?? '', role: 'Incident Handler' },
+      include: { assignedTickets: true }
+    })
+
     const total    = tickets.length
-    const open     = tickets.filter((t) => t.status === 'OPEN').length
-    const critical = tickets.filter((t) => t.severity === 'CRITICAL').length
+    const unassigned = tickets.filter((t) => !t.responderId).length
+    const resolved = tickets.filter((t) => t.status === 'RESOLVED').length
+    const pending  = tickets.filter((t) => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length
 
     return (
       <main className="min-h-screen bg-transparent p-6">
@@ -188,10 +205,44 @@ export default async function DashboardPage() {
           </div>
 
           {/* Summary panel */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             <StatCard label="Total Tickets" value={total} />
-            <StatCard label="Open" value={open} color="text-blue-600" />
-            <StatCard label="Critical" value={critical} color="text-red-600" />
+            <StatCard label="Unassigned" value={unassigned} color="text-red-500" />
+            <StatCard label="Pending" value={pending} color="text-blue-600" />
+            <StatCard label="Resolved" value={resolved} color="text-green-600" />
+          </div>
+
+          {/* Incident Responders Panel */}
+          <div className="bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] shadow-sm rounded-xl p-6 space-y-4">
+            <h2 className="text-lg font-bold text-[#1a1b2e] dark:text-[#dae2fd]">Incident Responders</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {handlers.map(h => {
+                const hTotal = h.assignedTickets.length
+                const hSolved = h.assignedTickets.filter(t => t.status === 'RESOLVED').length
+                const hPending = h.assignedTickets.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length
+                return (
+                  <div key={h.id} className="border border-[#d0d1e6] dark:border-[#464555] rounded-lg p-4 bg-[#f4f4fd] dark:bg-[#131b2e]">
+                    <div className="font-semibold text-[#1a1b2e] dark:text-[#dae2fd]">{h.name}</div>
+                    <div className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8] mb-2">{h.email}</div>
+                    <div className="grid grid-cols-3 gap-2 text-sm">
+                      <div className="text-center bg-white dark:bg-[#171f33] rounded py-1 border border-[#d0d1e6] dark:border-[#464555]">
+                        <div className="text-[#8b8ca8] text-[10px] uppercase font-bold">Total</div>
+                        <div className="font-semibold text-gray-800 dark:text-gray-200">{hTotal}</div>
+                      </div>
+                      <div className="text-center bg-white dark:bg-[#171f33] rounded py-1 border border-[#d0d1e6] dark:border-[#464555]">
+                        <div className="text-[#8b8ca8] text-[10px] uppercase font-bold">Pending</div>
+                        <div className="font-semibold text-blue-600 dark:text-blue-400">{hPending}</div>
+                      </div>
+                      <div className="text-center bg-white dark:bg-[#171f33] rounded py-1 border border-[#d0d1e6] dark:border-[#464555]">
+                        <div className="text-[#8b8ca8] text-[10px] uppercase font-bold">Solved</div>
+                        <div className="font-semibold text-green-600 dark:text-green-400">{hSolved}</div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+              {handlers.length === 0 && <p className="text-sm text-[#8b8ca8]">No responders found.</p>}
+            </div>
           </div>
 
           <TicketsTable tickets={tickets} />
@@ -218,7 +269,7 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#1a1b2e] dark:text-[#dae2fd]">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold text-[#1a1b2e] dark:text-[#dae2fd]">Administration Center</h1>
               <p className="text-sm text-[#8b8ca8] dark:text-[#c7c4d8] dark:text-[#c7c4d8] mt-1">All tickets across all departments</p>
             </div>
             <Link

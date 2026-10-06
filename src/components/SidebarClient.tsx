@@ -12,9 +12,8 @@ type SidebarProps = {
 const NAV_ITEMS = [
   { href: '/dashboard', icon: 'dashboard', label: 'Dashboard', roles: ['all'] },
   { href: '/tickets', icon: 'confirmation_number', label: 'My Tickets', roles: ['employee'] },
-  { href: '/admin/overview', icon: 'analytics', label: 'Overview', roles: ['admin'] },
   { href: '/admin/users', icon: 'group', label: 'User Management', roles: ['admin'] },
-  { href: '/admin/audit-logs', icon: 'history', label: 'Audit Logs', roles: ['admin'] },
+  { href: '/admin/audit-logs', icon: 'history', label: 'System Activity', roles: ['admin'] },
 ]
 
 export function SidebarClient({ userName, userRole, isEmployee, isAdmin }: SidebarProps) {
