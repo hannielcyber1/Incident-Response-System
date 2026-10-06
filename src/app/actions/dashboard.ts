@@ -51,20 +51,34 @@ export async function updateTicketStatus(ticketId: string, status: string) {
     },
   })
 
-  // Notify creator
-  await createNotification(
-    ticket.creatorId,
-    'Ticket Status Updated',
-    `Your ticket "${ticket.title}" is now ${status.replace('_', ' ')}.`,
-    status === 'RESOLVED' ? 'SUCCESS' : 'INFO',
-    ticket.id
-  )
+  // Notify creator with status-specific message
+  const statusMessages: Record<string, string> = {
+    IN_PROGRESS: `Good news! Your ticket "${ticket.title}" is now being worked on by our team.`,
+    RESOLVED: `Your ticket "${ticket.title}" has been resolved! You can reopen it if needed.`,
+    CLOSED: `Your ticket "${ticket.title}" has been closed.`,
+    REOPENED: `Your ticket "${ticket.title}" has been reopened and is awaiting reassignment.`,
+  }
+  const notifMessage = statusMessages[status] ?? `Your ticket "${ticket.title}" status changed to ${status.replace('_', ' ')}.`
+  const notifType = status === 'RESOLVED' ? 'SUCCESS' : status === 'IN_PROGRESS' ? 'INFO' : 'INFO'
+
+  await createNotification(ticket.creatorId, 'Ticket Update', notifMessage, notifType, ticket.id)
 
   await sendEmail({
     to: ticket.creator.email,
     subject: `Ticket Update: ${ticket.title}`,
-    html: `<p>Your ticket <strong>${ticket.title}</strong> is now <strong>${status.replace('_', ' ')}</strong>.</p>`
+    html: `<p>${notifMessage}</p>`
   })
+
+  // If ticket is now IN_PROGRESS and there's a responder, notify the responder too
+  if (status === 'IN_PROGRESS' && ticket.responder) {
+    await createNotification(
+      ticket.responder.id,
+      'Ticket Marked In Progress',
+      `You marked "${ticket.title}" as In Progress. Creator has been notified.`,
+      'INFO',
+      ticket.id
+    )
+  }
 
   revalidateDashboard(ticketId)
 }

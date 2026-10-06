@@ -17,7 +17,7 @@ function StatCard({ label, value, icon, iconBg, sub, subColor }: {
         </div>
       </div>
       <div className="mt-3">
-        <div className="text-3xl font-bold font-['Space_Grotesk'] text-[#1a1b2e] dark:text-[#dae2fd]">{value}</div>
+        <div className="text-3xl font-bold text-[#1a1b2e] dark:text-[#dae2fd]">{value}</div>
         <div className={`text-xs mt-1 ${subColor ?? 'text-[#5c5d7a] dark:text-[#c7c4d8]'}`}>{sub}</div>
       </div>
     </div>
@@ -34,7 +34,7 @@ function MiniStatCard({ label, value, icon, iconBg, valueColor }: {
       </div>
       <div>
         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#5c5d7a] dark:text-[#c7c4d8]">{label}</span>
-        <div className={`text-xl font-bold font-['Space_Grotesk'] leading-tight ${valueColor ?? 'text-[#1a1b2e] dark:text-[#dae2fd]'}`}>{value}</div>
+        <div className={`text-xl font-bold leading-tight ${valueColor ?? 'text-[#1a1b2e] dark:text-[#dae2fd]'}`}>{value}</div>
       </div>
     </div>
   )
@@ -87,7 +87,6 @@ export default async function AdminOverviewPage() {
     users: d.users.length,
   })).sort((a, b) => b.total - a.total)
 
-  const maxDept = Math.max(...deptStats.map(d => d.total), 1)
   const recentTickets = allTickets.slice(0, 5)
 
   const statusPill = (status: string) => {
@@ -134,7 +133,7 @@ export default async function AdminOverviewPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-['Space_Grotesk'] text-[#1a1b2e] dark:text-[#dae2fd] tracking-tight">System Overview</h1>
+          <h1 className="text-2xl font-bold text-[#1a1b2e] dark:text-[#dae2fd] tracking-tight">System Overview</h1>
           <p className="text-sm text-[#5c5d7a] dark:text-[#c7c4d8] mt-0.5">Analytics and operational statistics across all enterprise departments</p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -194,13 +193,13 @@ export default async function AdminOverviewPage() {
         <div className="lg:col-span-7 rounded-xl bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] p-5 flex flex-col shadow-sm">
           <div className="flex items-center justify-between pb-4 border-b border-[#d0d1e6] dark:border-[#464555]">
             <div>
-              <h3 className="text-sm font-semibold font-['Plus_Jakarta_Sans'] text-[#1a1b2e] dark:text-[#dae2fd]">Tickets by Department</h3>
+              <h3 className="text-sm font-semibold text-[#1a1b2e] dark:text-[#dae2fd]">Tickets by Department</h3>
               <p className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">Active workload distribution and team capacities</p>
             </div>
           </div>
 
           <div className="flex flex-col gap-5 mt-4 flex-1">
-            {deptStats.slice(0, 6).map(dept => {
+            {deptStats.slice(0, 8).map(dept => {
               const openW = dept.total ? Math.round((dept.open / dept.total) * 100) : 0
               const ipW = dept.total ? Math.round((dept.inProgress / dept.total) * 100) : 0
               const resW = dept.total ? Math.round((dept.resolved / dept.total) * 100) : 0
@@ -231,7 +230,7 @@ export default async function AdminOverviewPage() {
           </div>
 
           <div className="mt-4 pt-3 border-t border-[#d0d1e6] dark:border-[#464555] flex items-center justify-between text-xs">
-            <span className="text-[#5c5d7a] dark:text-[#c7c4d8]">{Math.max(0, deptStats.length - 6)} more departments</span>
+            <span className="text-[#5c5d7a] dark:text-[#c7c4d8]">{departments.length} total departments</span>
             <Link href="/dashboard" className="text-indigo-600 dark:text-[#c3c0ff] hover:underline font-medium flex items-center gap-0.5">
               View All <span className="material-symbols-outlined text-[14px]">chevron_right</span>
             </Link>
@@ -242,7 +241,7 @@ export default async function AdminOverviewPage() {
         <div className="lg:col-span-5 rounded-xl bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] p-5 flex flex-col shadow-sm">
           <div className="flex items-center justify-between pb-4 border-b border-[#d0d1e6] dark:border-[#464555]">
             <div>
-              <h3 className="text-sm font-semibold font-['Plus_Jakarta_Sans'] text-[#1a1b2e] dark:text-[#dae2fd]">Severity Distribution</h3>
+              <h3 className="text-sm font-semibold text-[#1a1b2e] dark:text-[#dae2fd]">Severity Distribution</h3>
               <p className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">Live breakdown of reported risk categories</p>
             </div>
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#eef0fb] dark:bg-[#222a3d] text-[#5c5d7a] dark:text-[#c7c4d8] border border-[#d0d1e6] dark:border-[#464555]">{total} Total</span>
@@ -255,7 +254,7 @@ export default async function AdminOverviewPage() {
                   <span className="text-[10px] font-mono font-bold text-[#5c5d7a] dark:text-[#c7c4d8] uppercase tracking-wider">{s.label}</span>
                   <span className={`w-2.5 h-2.5 rounded-full ${s.dot}`} />
                 </div>
-                <div className={`mt-2 text-2xl font-bold font-['Space_Grotesk'] ${s.color}`}>{s.count}</div>
+                <div className={`mt-2 text-2xl font-bold ${s.color}`}>{s.count}</div>
                 <div className="text-[10px] font-mono text-[#5c5d7a] dark:text-[#c7c4d8] mt-0.5">
                   {total ? Math.round((s.count / total) * 100) : 0}% of queue
                 </div>
@@ -263,13 +262,22 @@ export default async function AdminOverviewPage() {
             ))}
           </div>
 
-          {/* MTTA metric */}
+          {/* Resolution Rate metric */}
           <div className="mt-4 p-3 rounded-lg bg-[#eef0fb] dark:bg-[#131b2e] border border-[#d0d1e6] dark:border-[#464555] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-emerald-500 dark:text-emerald-400">speed</span>
-              <span className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">Mean Time to Acknowledge</span>
+              <span className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">Resolution Rate</span>
             </div>
-            <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">— mins</span>
+            <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400">{resRate}%</span>
+          </div>
+
+          {/* In Progress metric */}
+          <div className="mt-2 p-3 rounded-lg bg-[#eef0fb] dark:bg-[#131b2e] border border-[#d0d1e6] dark:border-[#464555] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-amber-500 dark:text-amber-400">pending</span>
+              <span className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">In Progress</span>
+            </div>
+            <span className="text-sm font-mono font-bold text-amber-600 dark:text-amber-400">{inProgress}</span>
           </div>
         </div>
       </div>
@@ -278,7 +286,7 @@ export default async function AdminOverviewPage() {
       <div className="rounded-xl bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] overflow-hidden shadow-sm">
         <div className="p-4 border-b border-[#d0d1e6] dark:border-[#464555] flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold font-['Plus_Jakarta_Sans'] text-[#1a1b2e] dark:text-[#dae2fd]">Recent Incidents</h3>
+            <h3 className="text-sm font-semibold text-[#1a1b2e] dark:text-[#dae2fd]">Recent Incidents</h3>
             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#eef0fb] dark:bg-[#222a3d] text-[#5c5d7a] dark:text-[#c7c4d8] border border-[#d0d1e6] dark:border-[#464555]">{recentTickets.length} Loaded</span>
           </div>
           <Link href="/dashboard" className="text-indigo-600 dark:text-[#c3c0ff] text-sm font-medium hover:underline">View All Tickets →</Link>
@@ -363,7 +371,7 @@ export default async function AdminOverviewPage() {
       <div className="rounded-xl bg-white dark:bg-[#171f33] border border-[#d0d1e6] dark:border-[#464555] p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold font-['Plus_Jakarta_Sans'] text-[#1a1b2e] dark:text-[#dae2fd]">Recent Activity</h3>
+            <h3 className="text-sm font-semibold text-[#1a1b2e] dark:text-[#dae2fd]">Recent Activity</h3>
             <p className="text-xs text-[#5c5d7a] dark:text-[#c7c4d8]">Latest system audit events</p>
           </div>
           <Link href="/admin/audit-logs" className="text-indigo-600 dark:text-[#c3c0ff] text-xs font-medium hover:underline">View all →</Link>

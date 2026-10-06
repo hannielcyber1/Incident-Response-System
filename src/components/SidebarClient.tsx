@@ -10,6 +10,7 @@ type SidebarProps = {
 }
 
 const NAV_ITEMS = [
+  { href: '/admin/overview', icon: 'analytics', label: 'Overview', roles: ['admin'] },
   { href: '/dashboard', icon: 'dashboard', label: 'Dashboard', roles: ['all'] },
   { href: '/tickets', icon: 'confirmation_number', label: 'My Tickets', roles: ['employee'] },
   { href: '/admin/users', icon: 'group', label: 'User Management', roles: ['admin'] },
@@ -82,11 +83,13 @@ export function SidebarClient({ userName, userRole, isEmployee, isAdmin }: Sideb
         {!collapsed && (
           <p className="px-3 py-1 text-[10px] font-bold text-[#5c5d7a] dark:text-[#464555] uppercase tracking-widest mb-1">Menu</p>
         )}
-        {visibleItems.map(item => (
+        {visibleItems.map(item => {
+            const label = (item.href === '/dashboard' && isAdmin) ? 'Administration Center' : item.label
+            return (
           <Link
             key={item.href}
             href={item.href}
-            title={collapsed ? item.label : undefined}
+            title={collapsed ? label : undefined}
             className={`flex items-center rounded-lg text-[#5c5d7a] dark:text-[#c7c4d8] hover:text-[#1a1b2e] dark:hover:text-[#dae2fd] hover:bg-[#eef0fb] dark:hover:bg-[#222a3d] transition-all duration-150 group ${
               collapsed ? 'justify-center p-2.5 my-0.5' : 'gap-3 px-3 py-2.5'
             }`}
@@ -94,9 +97,10 @@ export function SidebarClient({ userName, userRole, isEmployee, isAdmin }: Sideb
             <span className={`material-symbols-outlined transition-colors ${
               collapsed ? 'text-[22px]' : 'text-[20px]'
             } group-hover:text-indigo-500 dark:group-hover:text-[#c3c0ff]`}>{item.icon}</span>
-            {!collapsed && <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>}
+            {!collapsed && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}
           </Link>
-        ))}
+            )
+          })}
       </nav>
 
       {/* Expand button when collapsed */}

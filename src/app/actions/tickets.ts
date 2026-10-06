@@ -58,22 +58,30 @@ export async function createTicket(formData: FormData) {
   })
 
   // 4. Send Email & Notifications
+  const { createNotification } = await import('@/lib/notifications')
+
+  // Always notify the creator that their ticket was received
+  await createNotification(
+    user.id,
+    'Ticket Submitted Successfully',
+    `Your ticket "${ticket.title}" has been received and is awaiting assignment.`,
+    'INFO',
+    ticket.id
+  )
+
   if (deptHead) {
     await sendEmail({
       to: deptHead.email,
       subject: `Action Required: New Ticket in your department`,
-      html: `<p>A new ticket requires assignment: <strong>${ticket.title}</strong> (ID: ${ticket.id})</p>`
+      html: `<p>A new ticket requires assignment: <strong>${ticket.title}</strong> (ID: ${ticket.id})</p><p>Submitted by: ${user.name}</p>`
     })
-    
-    await import('@/lib/notifications').then(({ createNotification }) => {
-      return createNotification(
-        deptHead.id,
-        'New Ticket Requires Assignment',
-        `"${ticket.title}" needs to be assigned.`,
-        'ACTION',
-        ticket.id
-      )
-    })
+    await createNotification(
+      deptHead.id,
+      'New Ticket Requires Assignment',
+      `"${ticket.title}" submitted by ${user.name} needs to be assigned to a handler.`,
+      'ACTION',
+      ticket.id
+    )
   } else {
     await sendEmail({
       to: ADMIN_EMAILS,
